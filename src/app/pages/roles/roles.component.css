@@ -1,0 +1,193 @@
+/* Professional Role Management Styling */
+
+/* Blue strip design outside header box */
+.blue-strip {
+  position: absolute;
+  left: -12px;
+  top: 20px;
+  width: 4px;
+  height: 60px;
+  background-color: #0d2a66;
+  border-radius: 2px;
+}
+
+/* Toggle switch styling */
+.dot {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Enhanced hover effects for role cards */
+.role-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Professional modal styling */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced table styling */
+.table-row {
+  transition: background-color 0.15s ease-in-out;
+}
+
+.table-row:hover {
+  background-color: rgba(13, 42, 102, 0.05);
+}
+
+/* Statistics card enhancements */
+.stat-card {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Role badge styling */
+.role-badge {
+  transition: all 0.15s ease-in-out;
+}
+
+.role-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Enhanced form input styling */
+.form-input {
+  transition: all 0.2s ease-in-out;
+}
+
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(13, 42, 102, 0.1);
+}
+
+/* Loading animation */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Professional button styling */
+.btn-primary {
+  background: linear-gradient(135deg, #0d2a66 0%, #0a1f4d 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0a1f4d 0%, #081a40 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13, 42, 102, 0.3);
+}
+
+/* Enhanced action button styling */
+.action-btn {
+  transition: all 0.15s ease-in-out;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .blue-strip {
+    left: -8px;
+    width: 3px;
+    height: 40px;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .role-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Dark mode preparation */
+@media (prefers-color-scheme: dark) {
+  .role-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .stat-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+}
+
+/* Accessibility improvements */
+.focus-visible:focus {
+  outline: 2px solid #0d2a66;
+  outline-offset: 2px;
+}
+
+/* Professional scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced modal animations */
+.modal-enter {
+  animation: modalEnter 0.3s ease-out;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Professional table enhancements */
+.table-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.table-cell {
+  border-bottom: 1px solid rgba(13, 42, 102, 0.1);
+}
+
+/* Enhanced search input */
+.search-input {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.search-input:focus {
+  border-color: #0d2a66;
+  background: #ffffff;
+} 

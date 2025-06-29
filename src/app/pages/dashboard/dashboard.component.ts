@@ -29,6 +29,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   isLoggingOut = false;
   private userSubscription?: Subscription;
+  private dashboardSubscription?: Subscription;
+  private activitiesSubscription?: Subscription;
   
   // Loading states
   isLoadingStats = true;
@@ -38,7 +40,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   statsError = false;
   activitiesError = false;
   
-  // Dynamic data
+  // Dynamic data from backend
   dashboardStats: DashboardStats | null = null;
   recentActivities: RecentActivity[] = [];
   
@@ -70,7 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.isLoading = false;
     });
     
-    // Load dashboard data
+    // Load dashboard data from backend
     this.loadDashboardStats();
     this.loadRecentActivities();
   }
@@ -78,6 +80,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
+    }
+    if (this.dashboardSubscription) {
+      this.dashboardSubscription.unsubscribe();
+    }
+    if (this.activitiesSubscription) {
+      this.activitiesSubscription.unsubscribe();
     }
   }
 
@@ -94,16 +102,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isLoadingStats = true;
     this.statsError = false;
     
-    this.dashboardService.getDashboardStats().subscribe({
+    this.dashboardSubscription = this.dashboardService.getDashboardStats().subscribe({
       next: (stats) => {
         this.dashboardStats = stats;
         this.isLoadingStats = false;
+        console.log('Dashboard stats loaded:', stats);
       },
       error: (error) => {
         console.error('Error loading dashboard stats:', error);
         this.statsError = true;
         this.isLoadingStats = false;
         this.dashboardStats = null;
+        this.toastService.showError('Failed to load dashboard statistics');
       }
     });
   }
@@ -112,16 +122,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isLoadingActivities = true;
     this.activitiesError = false;
     
-    this.dashboardService.getRecentActivities(5).subscribe({
+    this.activitiesSubscription = this.dashboardService.getRecentActivities(5).subscribe({
       next: (activities) => {
         this.recentActivities = activities;
         this.isLoadingActivities = false;
+        console.log('Recent activities loaded:', activities);
       },
       error: (error) => {
         console.error('Error loading recent activities:', error);
         this.activitiesError = true;
         this.isLoadingActivities = false;
         this.recentActivities = [];
+        this.toastService.showError('Failed to load recent activities');
       }
     });
   }
@@ -147,20 +159,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
         color: 'green'
       },
       {
-        title: 'Orders Today',
-        value: this.dashboardStats.ordersToday.toLocaleString(),
-        change: `${this.dashboardStats.orderGrowth >= 0 ? '+' : ''}${this.dashboardStats.orderGrowth}%`,
-        changeType: this.dashboardStats.orderGrowth >= 0 ? 'increase' : 'decrease',
-        icon: 'shopping_cart',
+        title: 'Active Products',
+        value: this.dashboardStats.activeProducts.toLocaleString(),
+        change: `${Math.round((this.dashboardStats.activeProducts / this.dashboardStats.totalProducts) * 100)}%`,
+        changeType: 'increase',
+        icon: 'check_circle',
         color: 'yellow'
       },
       {
-        title: 'Revenue',
-        value: `$${this.dashboardStats.revenue.toLocaleString()}`,
+        title: 'Average Price',
+        value: `$${this.dashboardStats.averagePrice.toFixed(2)}`,
         change: `${this.dashboardStats.revenueGrowth >= 0 ? '+' : ''}${this.dashboardStats.revenueGrowth}%`,
         changeType: this.dashboardStats.revenueGrowth >= 0 ? 'increase' : 'decrease',
         icon: 'attach_money',
         color: 'purple'
+      }
+    ];
+  }
+
+  // Get additional stats for display
+  getAdditionalStats() {
+    if (!this.dashboardStats) return [];
+    
+    return [
+      {
+        label: 'Featured Products',
+        value: this.dashboardStats.featuredProducts,
+        icon: 'star',
+        color: 'text-yellow-600'
+      },
+      {
+        label: 'Categories',
+        value: this.dashboardStats.categoryCount,
+        icon: 'category',
+        color: 'text-blue-600'
+      },
+      {
+        label: 'Brands',
+        value: this.dashboardStats.brandCount,
+        icon: 'business',
+        color: 'text-green-600'
+      },
+      {
+        label: 'Low Stock Items',
+        value: this.dashboardStats.lowStockProducts,
+        icon: 'warning',
+        color: 'text-red-600'
       }
     ];
   }
@@ -256,4 +300,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.encryptionResult = '';
     this.encryptionError = '';
   }
+
+  // Template helper methods
+  getCurrentDate(): string {
+    return new Date().toLocaleDateString();
+  }
+
+  getCurrentTime(): string {
+    return new Date().toLocaleTimeString();
+  }
+
+  getProgressWidth(changeValue: string): number {
+    const value = Math.abs(parseFloat(changeValue));
+    return value > 100 ? 100 : value * 5;
+  }
+
+  // Refresh data manually
+  refreshDashboard() {
+    this.loadDashboardStats();
+    this.loadRecentActivities();
+    this.toastService.showSuccess('Dashboard data refreshed');
+  }
+
+  // Handle retry actions
+  retryStats() {
+    this.loadDashboardStats();
+  }
+
+  retryActivities() {
+    this.loadRecentActivities();
+  }
+
+  // Make Math available to template
+  Math = Math;
+  parseFloat = parseFloat;
 } 

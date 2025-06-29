@@ -53,11 +53,8 @@ export class AuthService {
     private http: HttpClient,
     private userService: UserService
   ) {
-    // Check if user is already logged in
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.userService.loadUserProfile().subscribe();
-    }
+    // Initialize but don't automatically load profile to avoid circular dependency
+    // Profile will be loaded when user explicitly logs in
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {

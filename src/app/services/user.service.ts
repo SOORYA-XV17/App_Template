@@ -47,10 +47,8 @@ export class UserService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Try to load user data if we have a token
-    if (localStorage.getItem('accessToken')) {
-      this.loadUserProfile();
-    }
+    // Initialize service but don't automatically load profile
+    // Profile loading will be triggered explicitly when needed
   }
 
   // User CRUD Operations

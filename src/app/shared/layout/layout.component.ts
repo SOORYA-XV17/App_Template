@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { SidebarComponent } from '../sidebar/sidebar.component';
 import { MenuService, SidebarItem } from '../../services/menu.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
@@ -24,12 +23,12 @@ interface NotificationItem {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent],
+  imports: [CommonModule, RouterModule],
   template: `
     <!-- Main Layout Container -->
     <div class="min-h-screen bg-gray-50">
       <!-- Professional Navbar -->
-      <nav class="bg-[#0d2a66] px-4 py-4 border-b border-[rgba(255,255,255,0.2)] shadow-lg relative z-50">
+      <nav class="bg-[#0d2a66] px-4 py-4 border-b border-[rgba(255,255,255,0.2)] shadow-lg fixed top-0 left-0 right-0 z-50">
         <div class="flex items-center justify-between">
           <!-- Left: Logo/Brand -->
           <div class="flex items-center">
@@ -95,15 +94,9 @@ interface NotificationItem {
 
       <!-- Professional Sidebar -->
       <aside [class]="'fixed left-0 w-64 bg-[#0d2a66] text-white font-outfit transform transition-transform duration-300 ease-cubic z-[60] ' +
-                      'top-22 h-[calc(100vh-5.5rem)] lg:top-1 lg:h-[calc(100vh-0.25rem)] ' +
+                      'top-16 h-[calc(100vh-4rem)] ' +
                       (isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full') + ' lg:translate-x-0'">
         <div class="h-full flex flex-col overflow-hidden">
-          <!-- Sidebar Header (hidden on mobile as navbar shows logo) -->
-          <div class="hidden lg:flex items-center px-6 py-6 border-b border-[rgba(255,255,255,0.1)]">
-            <img src="LOGO_HYUNDAI.svg" 
-                 alt="Hyundai Logo" 
-                 class="h-8 w-auto">
-          </div>
 
           <!-- Navigation Items -->
           <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto sidebar-scroll">
@@ -185,7 +178,7 @@ interface NotificationItem {
       <!-- Main Content Area -->
       <div class="lg:ml-64 min-h-screen">
         <!-- Page Content Slot -->
-        <main class="min-h-screen">
+        <main class="min-h-screen pt-16 pb-8">
           <ng-content></ng-content>
         </main>
       </div>
@@ -303,8 +296,19 @@ export class LayoutComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Load initial user data
-    this.userService.loadUserProfile().subscribe();
+    this.userService.loadUserProfile().subscribe({
+      next: () => {
+        // Profile loaded successfully, no action needed here as the above subscription handles the update
+        console.log('Layout: User profile loaded successfully.');
+      },
+      error: (err) => {
+        if (err.status === 403) {
+          console.warn('Layout: User does not have permission to load profile. This is expected for some roles.');
+        } else {
+          console.error('Layout: Failed to load user profile.', err);
+        }
+      }
+    });
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', (event) => {

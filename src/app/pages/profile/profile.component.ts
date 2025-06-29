@@ -3,19 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { UserService } from '../../services/user.service';
+import { UserService, UserProfile } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 import { LayoutWrapperComponent } from '../../shared/layout/layout-wrapper.component';
 import { Subscription } from 'rxjs';
-
-interface UserData {
-  username: string;
-  email: string;
-  name: string;
-  role: string;
-  avatar: string;
-  avatarLetter: string;
-}
 
 @Component({
   selector: 'app-profile',
@@ -25,75 +16,51 @@ interface UserData {
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+  currentUser: UserProfile | null = null;
   profileForm: FormGroup;
   isLoading = true;
   isSubmitting = false;
   isLoggingOut = false;
+  isSaving = false;
+  isEditing = false;
+  hasSuperAdminAccess = false;
 
   private userSubscription?: Subscription;
-
-  currentUser: UserData = {
-    username: '',
-    email: '',
-    name: '',
-    role: '',
-    avatar: '',
-    avatarLetter: ''
-  };
 
   // Add date properties for template
   currentDate = new Date();
   memberSinceDate = new Date('2024-01-01'); // Default date, should be set from user data
   lastLoginDate = new Date(); // Should be set from user data
 
-  private initializeFormWithUser(user: any) {
-    // Update current user data
-    this.currentUser = {
-      username: user.username,
-      email: user.email,
-      name: user.username, // Use username as name
-      role: user.roles[0] || 'User',
-      avatar: '',
-      avatarLetter: user.avatarLetter
-    };
-
-    // Update form with user data
-    this.profileForm.patchValue({
-      username: user.username,
-      email: user.email
-    }, { emitEvent: false }); // Prevent unnecessary form events
-  }
-
   constructor(
-    private formBuilder: FormBuilder,
-    private authService: AuthService,
+    private fb: FormBuilder,
     private userService: UserService,
     private toastService: ToastService,
+    private authService: AuthService,
     private router: Router
   ) {
-    this.profileForm = this.formBuilder.group({
-      username: [{ value: '', disabled: true }], // Display only
+    this.profileForm = this.fb.group({
+      username: [{ value: '', disabled: true }, Validators.required],
       email: ['', [Validators.required, Validators.email]]
     });
   }
 
-  ngOnInit() {
-    // Set loading state
+  ngOnInit(): void {
     this.isLoading = true;
-    console.log('Loading user profile...');
-
-    // First load fresh data from the backend
+    this.profileForm.disable();
+    this.hasSuperAdminAccess = this.authService.getUserRoles().includes('SUPERADMIN');
+    
     this.userService.loadUserProfile().subscribe({
       next: (user) => {
-        console.log('Received user data:', user);
-        this.initializeFormWithUser(user);
-      },
-      error: (error) => {
-        console.error('Failed to load user profile:', error);
-        this.toastService.showError('Failed to load user profile');
+        if (user) {
+          this.currentUser = user;
+          this.profileForm.patchValue(user);
+        }
         this.isLoading = false;
       },
-      complete: () => {
+      error: (err) => {
+        this.toastService.showError('Failed to load profile data');
+        console.error('Profile: Error loading user profile', err);
         this.isLoading = false;
       }
     });
@@ -102,7 +69,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.currentUser$.subscribe(user => {
       console.log('User update received:', user);
       if (user) {
-        this.initializeFormWithUser(user);
+        this.currentUser = user;
+        this.profileForm.patchValue(user);
       }
     });
   }
@@ -122,7 +90,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const formValue = this.profileForm.value;
     
     // Only proceed if email has changed
-    if (formValue.email !== this.currentUser.email) {
+    if (formValue.email !== this.currentUser?.email) {
       this.isSubmitting = true;
       
       this.userService.updateProfile({ email: formValue.email }).subscribe({
@@ -136,7 +104,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.toastService.showError(error.error?.message || 'Failed to update email');
           // Reset form to previous value on error
           this.profileForm.patchValue({
-            email: this.currentUser.email
+            email: this.currentUser?.email
           });
         },
         complete: () => {
@@ -148,7 +116,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   onCancel() {
     this.profileForm.patchValue({
-      email: this.currentUser.email
+      email: this.currentUser?.email
     });
     this.profileForm.markAsUntouched();
   }
@@ -196,6 +164,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
     Object.keys(this.profileForm.controls).forEach(key => {
       const control = this.profileForm.get(key);
       control?.markAsTouched();
+    });
+  }
+
+  editProfile() {
+    this.isEditing = true;
+    this.profileForm.enable();
+  }
+
+  saveProfile() {
+    if (this.profileForm.invalid) {
+      this.markFormGroupTouched();
+      return;
+    }
+
+    this.isSaving = true;
+    this.userService.updateProfile(this.profileForm.value).subscribe({
+      next: (updatedUser) => {
+        this.currentUser = updatedUser;
+        this.toastService.showSuccess('Profile updated successfully!');
+        this.isEditing = false;
+        this.profileForm.disable();
+        this.isSaving = false;
+        // No need to refresh user data globally here, the service's BehaviorSubject handles it.
+      },
+      error: (err) => {
+        this.toastService.showError('Failed to update profile');
+        this.isSaving = false;
+      }
     });
   }
 } 
