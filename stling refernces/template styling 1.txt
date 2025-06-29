@@ -1,0 +1,334 @@
+I'll provide detailed styling templates for each of these pages using Tailwind CSS. I'll structure them in a way that maintains consistency while being responsive and user-friendly.
+
+### 1. Login Page
+```html
+<!-- Login Container -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <img src="assets/logo.svg" alt="Logo" class="h-12 mx-auto">
+      <h1 class="mt-4 text-2xl font-bold text-gray-900">Welcome Back</h1>
+      <p class="mt-2 text-gray-600">Sign in to your account</p>
+    </div>
+
+    <!-- Login Form -->
+    <form class="space-y-6">
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" 
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               placeholder="Enter your email">
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <div class="relative">
+          <input type="password" 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                 placeholder="Enter your password">
+          <button type="button" 
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <span class="material-icons">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input type="checkbox" class="h-4 w-4 text-blue-600 rounded border-gray-300">
+          <label class="ml-2 text-sm text-gray-600">Remember me</label>
+        </div>
+        <a href="/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
+      </div>
+
+      <!-- Login Button -->
+      <button type="submit" 
+              class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition duration-150">
+        Sign In
+      </button>
+
+      <!-- Register Link -->
+      <p class="text-center text-sm text-gray-600">
+        Don't have an account? 
+        <a href="/register" class="text-blue-600 hover:text-blue-800">Create one</a>
+      </p>
+    </form>
+  </div>
+</div>
+```
+
+### 2. Register Page
+```html
+<!-- Register Container -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 flex items-center justify-center p-4">
+  <div class="max-w-lg w-full bg-white rounded-xl shadow-lg p-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">Create an Account</h1>
+      <p class="mt-2 text-gray-600">Join us to get started</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form class="space-y-6">
+      <!-- Name Fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+          <input type="text" 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+          <input type="text" 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" 
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Password Fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div class="relative">
+            <input type="password" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+              <span class="material-icons">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <div class="relative">
+            <input type="password" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="flex items-start">
+        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300">
+        <label class="ml-2 text-sm text-gray-600">
+          I agree to the 
+          <a href="#" class="text-blue-600 hover:text-blue-800">Terms of Service</a> and 
+          <a href="#" class="text-blue-600 hover:text-blue-800">Privacy Policy</a>
+        </label>
+      </div>
+
+      <!-- Register Button -->
+      <button type="submit" 
+              class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200">
+        Create Account
+      </button>
+
+      <!-- Login Link -->
+      <p class="text-center text-sm text-gray-600">
+        Already have an account? 
+        <a href="/login" class="text-blue-600 hover:text-blue-800">Sign in</a>
+      </p>
+    </form>
+  </div>
+</div>
+```
+
+### 3. Forgot/Reset Password Pages
+```html
+<!-- Forgot Password Container -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-block p-3 rounded-full bg-blue-100 mb-4">
+        <span class="material-icons text-blue-600 text-2xl">lock_reset</span>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900">Reset Password</h1>
+      <p class="mt-2 text-gray-600">Enter your email to receive reset instructions</p>
+    </div>
+
+    <!-- Form -->
+    <form class="space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+        <input type="email" 
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <button type="submit" 
+              class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200">
+        Send Reset Link
+      </button>
+
+      <p class="text-center text-sm text-gray-600">
+        Remember your password? 
+        <a href="/login" class="text-blue-600 hover:text-blue-800">Back to login</a>
+      </p>
+    </form>
+  </div>
+</div>
+```
+
+### 4. Dashboard (Main Landing Page)
+```html
+<div class="p-6 space-y-6">
+  <!-- Welcome Section -->
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Welcome back, John!</h1>
+        <p class="mt-1 text-gray-600">Here's what's happening today.</p>
+      </div>
+      <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        New Task
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Stat Card -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Products</p>
+          <h3 class="mt-2 text-3xl font-bold text-gray-900">2,451</h3>
+        </div>
+        <div class="p-3 bg-blue-100 rounded-full">
+          <span class="material-icons text-blue-600">inventory_2</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-green-600">
+        <span class="material-icons text-sm">arrow_upward</span>
+        <span class="ml-1 text-sm">12% increase</span>
+      </div>
+    </div>
+    <!-- More stat cards -->
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Chart Card -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Monthly Trends</h3>
+      <!-- Chart content -->
+    </div>
+    <!-- More chart cards -->
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-white rounded-xl shadow-sm">
+    <div class="p-6 border-b">
+      <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+    </div>
+    <div class="p-6">
+      <!-- Activity list -->
+      <div class="space-y-4">
+        <div class="flex items-start">
+          <div class="p-2 bg-blue-100 rounded-full">
+            <span class="material-icons text-blue-600">notifications</span>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-900">New order received</p>
+            <p class="text-sm text-gray-600">Order #12345 needs processing</p>
+            <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+          </div>
+        </div>
+        <!-- More activity items -->
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### 5. User Profile Page
+```html
+<div class="p-6 max-w-4xl mx-auto space-y-6">
+  <!-- Profile Header -->
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center">
+      <div class="relative">
+        <img src="user-avatar.jpg" 
+             alt="Profile" 
+             class="h-24 w-24 rounded-full object-cover">
+        <button class="absolute bottom-0 right-0 p-1 bg-gray-100 rounded-full border-2 border-white hover:bg-gray-200">
+          <span class="material-icons text-gray-600">edit</span>
+        </button>
+      </div>
+      <div class="ml-6">
+        <h1 class="text-2xl font-bold text-gray-900">John Doe</h1>
+        <p class="text-gray-600">Software Engineer</p>
+        <div class="mt-2 flex items-center text-sm text-gray-500">
+          <span class="material-icons text-sm mr-1">location_on</span>
+          New York, USA
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Sections -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Personal Information -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Personal Information</h2>
+          <button class="text-blue-600 hover:text-blue-800">
+            <span class="material-icons">edit</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-600">First Name</label>
+            <input type="text" 
+                   class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                   value="John">
+          </div>
+          <!-- More fields -->
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <!-- Similar structure -->
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Account Settings -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Account Settings</h2>
+        <div class="space-y-4">
+          <a href="#" class="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <span class="material-icons text-gray-400 mr-3">security</span>
+              <span class="text-gray-700">Security Settings</span>
+            </div>
+            <span class="material-icons text-gray-400">chevron_right</span>
+          </a>
+          <!-- More settings links -->
+        </div>
+      </div>
+
+      <!-- Connected Accounts -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <!-- Similar structure -->
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Would you like me to continue with the remaining pages (Admin Dashboard, Menu/Navigation Management, Location Code Management, and Product Management)? I can also provide the styling for any specific components within these pages that you're particularly interested in.

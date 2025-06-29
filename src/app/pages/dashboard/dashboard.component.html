@@ -1,0 +1,232 @@
+<!-- Loading Overlay -->
+<div *ngIf="isLoading" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0d2a66] mx-auto"></div>
+    <p class="mt-4 text-gray-600">Loading dashboard...</p>
+  </div>
+</div>
+
+<!-- Shared Layout Wrapper -->
+<app-layout-wrapper pageTitle="Dashboard">
+  <!-- Page Content -->
+  <div class="p-6 space-y-6">
+    <!-- Welcome Section -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Welcome back, {{ currentUser.name }}!</h1>
+          <p class="mt-2 text-gray-600">Here's what's happening with your business today.</p>
+        </div>
+        <button class="bg-[#0d2a66] hover:bg-[#0d2a66]/90 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#0d2a66] focus:ring-offset-2 flex items-center space-x-2">
+          <span class="material-icons text-sm">add</span>
+          <span>Quick Action</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Loading State -->
+      <div *ngIf="isLoadingStats" class="col-span-full">
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0d2a66] mx-auto"></div>
+          <p class="mt-2 text-gray-600">Loading statistics...</p>
+        </div>
+      </div>
+      
+      <!-- Error State -->
+      <div *ngIf="statsError && !isLoadingStats" class="col-span-full">
+        <div class="text-center py-8">
+          <span class="material-icons text-red-500 text-4xl">error_outline</span>
+          <div class="text-red-600 font-medium mt-2">Failed to load statistics</div>
+          <button (click)="loadDashboardStats()" class="mt-3 px-4 py-2 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90">
+            <span class="material-icons mr-1 text-sm">refresh</span>
+            Retry
+          </button>
+        </div>
+      </div>
+      
+      <!-- Statistics Data -->
+      <div *ngFor="let stat of getStatCards(); trackBy: trackByStatTitle" class="stat-card">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <p class="text-lg font-medium text-gray-900">{{ stat.title }}</p>
+            <h3 class="mt-2 text-3xl font-bold" [class]="getStatColorClass(stat.color)">
+              {{ stat.value }}
+            </h3>
+            <div class="mt-2 flex items-center text-sm">
+              <span [class]="stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'" 
+                    class="flex items-center">
+                <span class="material-icons text-sm">
+                  {{ stat.changeType === 'increase' ? 'arrow_upward' : 'arrow_downward' }}
+                </span>
+                {{ stat.change }}
+              </span>
+              <span class="text-gray-500 ml-1">from last month</span>
+            </div>
+          </div>
+          <div [class]="'h-12 w-12 rounded-full flex items-center justify-center ' + getStatBgClass(stat.color)">
+            <span [class]="'material-icons ' + getStatColorClass(stat.color)">{{ stat.icon }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent Activity -->
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm">
+        <div class="p-6 border-b border-gray-100">
+          <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+        </div>
+        <div class="p-6">
+          <!-- Loading State -->
+          <div *ngIf="isLoadingActivities" class="text-center py-8">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0d2a66] mx-auto"></div>
+            <p class="mt-2 text-gray-600 text-sm">Loading activities...</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="activitiesError && !isLoadingActivities" class="text-center py-8">
+            <span class="material-icons text-red-500 text-3xl">error_outline</span>
+            <div class="text-red-600 font-medium mt-2">Failed to load activities</div>
+            <button (click)="loadRecentActivities()" class="mt-3 px-3 py-1 bg-[#0d2a66] text-white rounded text-sm hover:bg-[#0d2a66]/90">
+              <span class="material-icons mr-1 text-xs">refresh</span>
+              Retry
+            </button>
+          </div>
+
+          <!-- No Activities State -->
+          <div *ngIf="!isLoadingActivities && !activitiesError && recentActivities.length === 0" class="text-center py-8">
+            <span class="material-icons text-gray-400 text-4xl">timeline</span>
+            <div class="text-gray-600 font-medium mt-2">No recent activities</div>
+            <p class="text-gray-500 text-sm">Activities will appear here as they happen.</p>
+          </div>
+
+          <!-- Activities Data -->
+          <div *ngIf="!isLoadingActivities && !activitiesError && recentActivities.length > 0" class="space-y-6">
+            <div *ngFor="let activity of recentActivities; trackBy: trackByActivityId" class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div [class]="'h-8 w-8 rounded-full flex items-center justify-center ' + activity.color">
+                  <span class="material-icons text-white text-sm">{{ activity.icon }}</span>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-sm font-medium text-gray-900">{{ activity.title }}</h3>
+                <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ formatActivityTime(activity.timestamp) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="bg-white rounded-xl shadow-sm">
+        <div class="p-6 border-b border-gray-100">
+          <h2 class="text-lg font-semibold text-gray-900">Quick Links</h2>
+        </div>
+        <div class="p-6">
+          <div class="space-y-3">
+            <a routerLink="/admin" 
+               class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="material-icons text-[#0d2a66]">admin_panel_settings</span>
+              <span class="text-sm font-medium text-gray-900">Admin Panel</span>
+            </a>
+            
+            <a routerLink="/profile" 
+               class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="material-icons text-green-600">person</span>
+              <span class="text-sm font-medium text-gray-900">User Profile</span>
+            </a>
+            
+            <a routerLink="/menu-management" 
+               class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="material-icons text-purple-600">menu_book</span>
+              <span class="text-sm font-medium text-gray-900">Menu Management</span>
+            </a>
+            
+            <a routerLink="/settings" 
+               class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="material-icons text-gray-600">settings</span>
+              <span class="text-sm font-medium text-gray-900">Settings</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hybrid Encryption Test Section -->
+    <div class="bg-white rounded-xl shadow-sm">
+      <div class="p-6 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">🔐 Hybrid Encryption Test</h2>
+        <p class="text-sm text-gray-600 mt-1">Test the secure encryption and decryption functionality</p>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <!-- Test Input -->
+          <div>
+            <label for="testMessage" class="block text-sm font-medium text-gray-700 mb-2">
+              Message to Encrypt:
+            </label>
+            <textarea
+              id="testMessage"
+              [(ngModel)]="testMessage"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0d2a66] focus:border-transparent"
+              placeholder="Enter a message to test hybrid encryption..."
+            ></textarea>
+          </div>
+
+          <!-- Test Buttons -->
+          <div class="flex space-x-3">
+            <button
+              (click)="testEncryption()"
+              [disabled]="isEncrypting || !testMessage.trim()"
+              class="px-4 py-2 bg-[#0d2a66] text-white rounded-md hover:bg-[#0d2a66]/90 focus:outline-none focus:ring-2 focus:ring-[#0d2a66] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {{ isEncrypting ? 'Encrypting...' : '🔒 Test Encryption' }}
+            </button>
+            
+            <button
+              (click)="clearTest()"
+              class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm"
+            >
+              Clear
+            </button>
+          </div>
+
+          <!-- Test Results -->
+          <div *ngIf="encryptionResult" class="space-y-3">
+            <div class="bg-green-50 p-4 rounded-md">
+              <h3 class="text-sm font-medium text-green-800 mb-2">✅ Encryption Test Results:</h3>
+              <div class="space-y-2 text-sm">
+                <p><strong>Original:</strong> <span class="text-gray-700">{{ testMessage }}</span></p>
+                <p><strong>Decrypted Response:</strong> <span class="text-gray-700 font-mono">{{ encryptionResult }}</span></p>
+                <p><strong>Status:</strong> <span class="text-green-600">Success! Data was encrypted, sent to server, and decrypted correctly.</span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Display -->
+          <div *ngIf="encryptionError" class="bg-red-50 p-4 rounded-md">
+            <h3 class="text-sm font-medium text-red-800 mb-2">❌ Encryption Test Failed:</h3>
+            <p class="text-sm text-red-700">{{ encryptionError }}</p>
+          </div>
+
+          <!-- Quick Test Link -->
+          <div class="pt-4 border-t border-gray-200">
+            <a routerLink="/hybrid-encryption-test" 
+               class="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm">
+              <span class="material-icons text-sm">open_in_new</span>
+              <span>Open Full Encryption Test Page</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-layout-wrapper>
+
+
+                   

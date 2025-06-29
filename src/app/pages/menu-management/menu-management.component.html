@@ -1,0 +1,383 @@
+<!-- Shared Layout Wrapper -->
+<app-layout-wrapper pageTitle="Menu Management">
+  <!-- Page Content -->
+  <div class="p-6">
+    <!-- Page Header -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Menu Management</h1>
+      <p class="mt-1 text-gray-600">Manage navigation menus, their order, and role assignments</p>
+    </div>
+
+    <!-- Filters and Actions -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search -->
+        <div>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="applyFilters()"
+            placeholder="Search menus..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          />
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <select
+            [(ngModel)]="statusFilter"
+            (ngModelChange)="applyFilters()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Add Menu Button -->
+        <div class="flex justify-end">
+          <button
+            (click)="openMenuModal()"
+            class="px-4 py-2 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90 flex items-center transition-all duration-200 shadow-sm"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="mt-4 flex items-center space-x-4" *ngIf="selectedMenuIds.size > 0">
+        <span class="text-sm text-gray-600">{{ selectedMenuIds.size }} items selected</span>
+        <button
+          (click)="bulkToggleStatus(true)"
+          class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+        >
+          Activate Selected
+        </button>
+        <button
+          (click)="bulkToggleStatus(false)"
+          class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+        >
+          Deactivate Selected
+        </button>
+      </div>
+    </div>
+
+    <!-- Menu List -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0d2a66]"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && filteredMenus.length === 0" class="text-center py-12">
+        <div class="inline-block p-4 rounded-full bg-gray-100 mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900">No menus found</h3>
+        <p class="mt-2 text-sm text-gray-500">Add a new menu to get started</p>
+        <button
+          (click)="openMenuModal()"
+          class="mt-4 px-4 py-2 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90 transition-all duration-200 shadow-sm"
+        >
+          Add Menu
+        </button>
+      </div>
+
+      <!-- Menu Table -->
+      <div *ngIf="!loading && filteredMenus.length > 0" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left">
+                <input
+                  type="checkbox"
+                  [checked]="selectedMenuIds.size === filteredMenus.length && filteredMenus.length > 0"
+                  (change)="toggleAllMenus($event)"
+                  class="rounded border-gray-300 text-[#0d2a66] focus:ring-[#0d2a66]"
+                />
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Menu Name
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Path
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Parent Menu
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Order
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody cdkDropList (cdkDropListDropped)="onDrop($event)" class="divide-y divide-gray-200">
+            <tr *ngFor="let menu of filteredMenus" cdkDrag class="hover:bg-gray-50">
+              <td class="px-4 py-3 whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  [checked]="selectedMenuIds.has(menu.id)"
+                  (change)="toggleMenuSelection(menu.id)"
+                  class="rounded border-gray-300 text-[#0d2a66] focus:ring-[#0d2a66]"
+                />
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i *ngIf="menu.icon && menu.icon.trim(); else defaultIcon" [class]="menu.icon + ' mr-2 text-gray-400'"></i>
+                  <ng-template #defaultIcon>
+                    <span class="material-icons mr-2 text-gray-400">menu</span>
+                  </ng-template>
+                  <span class="font-medium text-gray-900">{{ menu.name }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">{{ menu.path }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">
+                {{ menu.parentMenu?.name || '-' }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">{{ menu.displayOrder }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span [class]="menu.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                      class="px-2 py-1 text-xs font-medium rounded-full">
+                  {{ menu.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <div class="flex items-center space-x-2">
+                  <button
+                    (click)="openMenuModal(menu)"
+                    class="p-1 text-[#0d2a66] hover:bg-[#0d2a66]/10 rounded transition-all duration-200"
+                    title="Edit"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="openRoleModal(menu)"
+                    class="p-1 text-purple-600 hover:bg-purple-50 rounded"
+                    title="Assign Roles"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="toggleMenuStatus(menu)"
+                    [class]="menu.isActive ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'"
+                    class="p-1 rounded"
+                    [title]="menu.isActive ? 'Deactivate' : 'Activate'"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="moveMenu(menu, 'up')"
+                    class="p-1 text-gray-600 hover:bg-gray-50 rounded"
+                    title="Move Up"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="moveMenu(menu, 'down')"
+                    class="p-1 text-gray-600 hover:bg-gray-50 rounded"
+                    title="Move Down"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="openDeleteModal(menu)"
+                    class="p-1 text-red-600 hover:bg-red-50 rounded"
+                    title="Delete"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-layout-wrapper>
+
+<!-- Menu Modal -->
+<div *ngIf="showMenuModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <h2 class="text-lg font-semibold mb-4">{{ selectedMenu ? 'Edit Menu' : 'Add Menu' }}</h2>
+    
+    <form [formGroup]="menuForm" (ngSubmit)="saveMenu()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          placeholder="Enter menu name"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Path</label>
+        <input
+          type="text"
+          formControlName="path"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          placeholder="Enter menu path"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+        <input
+          type="number"
+          formControlName="displayOrder"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          placeholder="Enter display order"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea
+          formControlName="description"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          placeholder="Enter description"
+          rows="3"
+        ></textarea>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+        <input
+          type="text"
+          formControlName="icon"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+          placeholder="Enter icon class"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Parent Menu</label>
+        <select
+          formControlName="parentMenuId"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+        >
+          <option value="">No Parent</option>
+          <option *ngFor="let parent of parentMenus" [value]="parent.id">
+            {{ parent.name }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          formControlName="isActive"
+          class="rounded border-gray-300 text-[#0d2a66] focus:ring-[#0d2a66]"
+        />
+        <label class="ml-2 text-sm text-gray-700">Active</label>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          (click)="closeMenuModal()"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="menuForm.invalid"
+          class="px-4 py-2 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90 disabled:opacity-50 transition-all duration-200 shadow-sm"
+        >
+          {{ selectedMenu ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <h2 class="text-lg font-semibold mb-4">Delete Menu</h2>
+    <p class="text-gray-600 mb-6">
+      Are you sure you want to delete "{{ selectedMenuForDelete?.name }}"? This action cannot be undone.
+    </p>
+    <div class="flex justify-end space-x-3">
+      <button
+        (click)="closeDeleteModal()"
+        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="deleteMenu()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Role Assignment Modal -->
+<div *ngIf="showRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <h2 class="text-lg font-semibold mb-4">Assign Role to Menu</h2>
+    <p class="text-gray-600 mb-4">Assign a role to "{{ selectedMenuForRole?.name }}"</p>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Select Role</label>
+        <select
+          [(ngModel)]="selectedRoleId"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0d2a66]"
+        >
+          <option value="">Select a role</option>
+          <option *ngFor="let role of roles" [value]="role.id">
+            {{ role.name }} - {{ role.description }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button
+          (click)="closeRoleModal()"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="saveMenuRoles()"
+          [disabled]="!selectedRoleId"
+          class="px-4 py-2 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90 disabled:opacity-50 transition-all duration-200 shadow-sm"
+        >
+          Assign Role
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,222 @@
+<!-- Loading Overlay -->
+<div *ngIf="isLoading" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0d2a66] mx-auto"></div>
+    <p class="mt-4 text-gray-600">Loading profile...</p>
+  </div>
+</div>
+
+<!-- Shared Layout Wrapper -->
+<app-layout-wrapper pageTitle="User Profile">
+  <!-- Page Content -->
+  <div class="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">User Profile</h1>
+        <p class="mt-2 text-gray-600">Manage your account information and preferences</p>
+      </div>
+
+      <!-- Main Profile Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Profile Overview -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Profile Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#0d2a66] to-[#0d2a66]/80 p-6 text-white">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-24 h-24 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-white text-3xl font-bold shadow-lg backdrop-blur-sm">
+                  {{ currentUser.avatarLetter }}
+                </div>
+                <h2 class="mt-4 text-xl font-semibold">{{ currentUser.name || currentUser.username }}</h2>
+                <p class="text-blue-100">{{ currentUser.email }}</p>
+                <div class="mt-3 px-3 py-1 bg-white/20 rounded-full text-sm">
+                  {{ currentUser.role }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Account Stats -->
+            <div class="p-6">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span class="text-sm font-medium text-gray-600">Account Status</span>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-green-600 font-medium">Active</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span class="text-sm font-medium text-gray-600">Member Since</span>
+                  <span class="text-sm text-gray-900">{{ memberSinceDate | date:'MMM yyyy' }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between py-2">
+                  <span class="text-sm font-medium text-gray-600">Last Login</span>
+                  <span class="text-sm text-gray-900">{{ formatTimeAgo(lastLoginDate) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+              <button routerLink="/dashboard" 
+                      class="w-full flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-[#0d2a66]/5 transition-all duration-200 group">
+                <span class="material-icons text-[#0d2a66] text-lg">dashboard</span>
+                <span class="text-sm font-medium text-gray-700 group-hover:text-[#0d2a66]">Go to Dashboard</span>
+              </button>
+              
+              <button routerLink="/settings" 
+                      class="w-full flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-[#0d2a66]/5 transition-all duration-200 group">
+                <span class="material-icons text-[#0d2a66] text-lg">settings</span>
+                <span class="text-sm font-medium text-gray-700 group-hover:text-[#0d2a66]">Account Settings</span>
+              </button>
+              
+              <button (click)="logout()" 
+                      [disabled]="isLoggingOut"
+                      class="w-full flex items-center space-x-3 p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-all duration-200 group disabled:opacity-50">
+                <span class="material-icons text-red-600 text-lg">logout</span>
+                <span class="text-sm font-medium text-red-700">
+                  {{ isLoggingOut ? 'Logging out...' : 'Logout' }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Profile Form and Details -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Profile Information Form -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Profile Information</h3>
+              <p class="text-sm text-gray-600">Update your personal information and email preferences</p>
+            </div>
+            
+            <div class="p-6">
+              <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                <!-- Username (Read-only) -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <span class="material-icons text-sm mr-1 align-middle">person</span>
+                    Username
+                  </label>
+                  <div class="relative">
+                    <input
+                      type="text"
+                      formControlName="username"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 focus:outline-none"
+                      readonly
+                    />
+                    <div class="absolute right-3 top-3">
+                      <span class="material-icons text-gray-400 text-sm">lock</span>
+                    </div>
+                  </div>
+                  <p class="mt-2 text-xs text-gray-500 flex items-center">
+                    <span class="material-icons text-xs mr-1">info</span>
+                    Username cannot be changed for security reasons
+                  </p>
+                </div>
+
+                <!-- Email -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <span class="material-icons text-sm mr-1 align-middle">email</span>
+                    Email Address
+                  </label>
+                  <div class="relative">
+                    <input
+                      type="email"
+                      formControlName="email"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0d2a66] focus:border-[#0d2a66] transition-all duration-200"
+                      [class.border-red-300]="emailError"
+                      [class.focus:ring-red-500]="emailError"
+                      placeholder="Enter your email address"
+                    />
+                    <div class="absolute right-3 top-3">
+                      <span class="material-icons text-gray-400 text-sm">edit</span>
+                    </div>
+                  </div>
+                  <div *ngIf="emailError" class="mt-2 flex items-center text-sm text-red-600">
+                    <span class="material-icons text-sm mr-1">error</span>
+                    {{ emailError }}
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    (click)="onCancel()"
+                    class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 font-medium transition-all duration-200 flex items-center justify-center"
+                  >
+                    <span class="material-icons text-sm mr-2">refresh</span>
+                    Reset Changes
+                  </button>
+                  <button
+                    type="submit"
+                    [disabled]="profileForm.invalid || isSubmitting"
+                    class="px-6 py-2.5 bg-[#0d2a66] text-white rounded-lg hover:bg-[#0d2a66]/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 flex items-center justify-center shadow-sm"
+                  >
+                    <span *ngIf="isSubmitting" class="flex items-center">
+                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </span>
+                    <span *ngIf="!isSubmitting" class="flex items-center">
+                      <span class="material-icons text-sm mr-2">save</span>
+                      Update Profile
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Account Security -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Account Security</h3>
+              <p class="text-sm text-gray-600">Manage your account security settings</p>
+            </div>
+            
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-4 border border-gray-200 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span class="material-icons text-green-600">verified_user</span>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900">Account Verified</h4>
+                      <p class="text-sm text-gray-600">Your account is verified and secure</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="p-4 border border-gray-200 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span class="material-icons text-[#0d2a66]">security</span>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900">Password Protected</h4>
+                      <p class="text-sm text-gray-600">Your account uses secure authentication</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-layout-wrapper>
+
